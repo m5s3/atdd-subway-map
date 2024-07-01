@@ -99,7 +99,7 @@ public class StationAcceptanceTest {
                 .when().get("/stations")
                 .then().log().all()
                 .extract().jsonPath().getList("name", String.class);
-        assertThat(stationsNames).doesNotContain("stationName");
+        assertThat(stationsNames).doesNotContain(stationName);
         assertThat(stationsNames.size()).isEqualTo(expectedCountOfStation);
     }
 
