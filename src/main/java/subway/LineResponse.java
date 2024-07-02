@@ -1,6 +1,7 @@
 package subway;
 
 public class LineResponse {
+    private Long id;
     private String name;
     private String color;
     private StationResponse upStationResponse;
