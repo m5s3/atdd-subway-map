@@ -6,16 +6,18 @@ import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import subway.fixture.StationAcceptanceFixture;
 
 @DisplayName("지하철노선 관련 기능")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class StationLineTest {
+public class StationLineTest extends StationAcceptanceFixture {
 
     /**
      * Given: 새로운 지하철 노선 정보를 입력하고,
@@ -32,16 +34,7 @@ public class StationLineTest {
         params.put("upStationId", "1");
         params.put("downStationId", "2");
         params.put("distance", "10");
-        /**
-         *
-         * ExtractableResponse<Response> response =
-         *                 RestAssured.given().log().all()
-         *                         .body(params)
-         *                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-         *                         .when().post("/stations")
-         *                         .then().log().all()
-         *                         .extract();
-         */
+
         // when
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .body(params)
@@ -52,6 +45,7 @@ public class StationLineTest {
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-
+        List<String> names = response.jsonPath().getList("stations.name", String.class);
+        assertThat(names).contains("지하철역","새로운지하철역");
     }
 }

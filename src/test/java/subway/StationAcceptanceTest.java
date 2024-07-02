@@ -12,12 +12,13 @@ import org.springframework.http.MediaType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import subway.fixture.StationAcceptanceFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("지하철역 관련 기능")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class StationAcceptanceTest {
+public class StationAcceptanceTest extends StationAcceptanceFixture {
     /**
      * When 지하철역을 생성하면
      * Then 지하철역이 생성된다
@@ -59,7 +60,6 @@ public class StationAcceptanceTest {
     @Test
     void readStations() {
         // Given
-        createStations();
         int expectedCountOfStation = 2;
 
         // When
@@ -82,7 +82,6 @@ public class StationAcceptanceTest {
     @Test
     void deleteStation() {
         // Given
-        List<ExtractableResponse<Response>> stations = createStations();
         ExtractableResponse<Response> responseExtractableResponse = stations.get(0);
         Long stationId = responseExtractableResponse.jsonPath().getObject("id", Long.class);
         String stationName = responseExtractableResponse.jsonPath().getObject("name", String.class);
