@@ -1,6 +1,11 @@
 package subway;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class LineService {
 
-    private LineRepository lineRepository;
-    private StationRepository stationRepository;
+    private final LineRepository lineRepository;
+    private final StationRepository stationRepository;
 
     public LineService(LineRepository lineRepository, StationRepository stationRepository) {
         this.lineRepository = lineRepository;
@@ -40,5 +45,32 @@ public class LineService {
                 lineRequest.getUpStationId(),
                 lineRequest.getDownStationId(),
                 lineRequest.getDistance());
+    }
+
+    public List<LineResponse> findAllLines() {
+        List<Line> lines = lineRepository.findAll();
+        Map<Long, Station> stations = fetchStations(fetchStationsIds(lines));
+        return lines.stream().map(line ->
+                        new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance(),
+                                createStationsResponses(stations, line))
+                )
+                .collect(Collectors.toList());
+    }
+
+    private List<StationResponse> createStationsResponses(Map<Long, Station> stations, Line line) {
+        Station upStation = stations.get(line.getUpStationId());
+        Station downStation = stations.get(line.getDownStationId());
+        return List.of(StationResponse.fromEntity(upStation),
+                StationResponse.fromEntity(downStation));
+    }
+
+    private List<Long> fetchStationsIds(List<Line> lines) {
+        List<Long> ids = new ArrayList<>();
+        lines.forEach(line -> ids.addAll(line.getStationsIds()));
+        return ids.stream().distinct().collect(Collectors.toList());
+    }
+
+    private Map<Long, Station> fetchStations(List<Long> ids) {
+        return new Stations(stationRepository.findStationsByIdIn(ids)).toMap();
     }
 }
