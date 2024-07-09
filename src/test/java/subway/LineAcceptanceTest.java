@@ -209,6 +209,46 @@ public class LineAcceptanceTest {
         assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, thirdStationId);
     }
 
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 관리자가 해당 노선을 삭제하면,
+     * Then: 해당 노선이 삭제되고 노선 목록에서 제외된다.
+     */
+    @Test
+    @DisplayName("지하철 노선을 삭제한다.")
+    void deleteLine() {
+        // Given
+        Long firstStationId = requestCreateStation("지하철역")
+                .jsonPath()
+                .getObject("id", Long.class);
+        Long secondStationId = requestCreateStation("새로운지하철")
+                .jsonPath()
+                .getObject("id", Long.class);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "신분당선");
+        params.put("color", "bg-red-600");
+        params.put("upStationId", firstStationId);
+        params.put("downStationId", secondStationId);
+        params.put("distance", 10);
+        Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
+
+        // When
+        RestAssured.given().log().all()
+                .when()
+                .delete("/lines/" + lineId)
+                .then().log().all();
+        
+        // Then
+        ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
+                .extract();
+
+        System.out.println("lineId = " + lineId);
+        List<Long> lineIds = response.jsonPath().getList("id", Long.class);
+        System.out.println("lineIds = " + lineIds);
+        assertThat(lineIds).doesNotContain(lineId);
+    }
+
     private static ExtractableResponse<Response> requestCreateLine(Map<String, Object> params) {
         return RestAssured.given().log().all()
                 .body(params)

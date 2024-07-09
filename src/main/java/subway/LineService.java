@@ -88,4 +88,9 @@ public class LineService {
 
         line.update(lineRequest);
     }
+
+    @Transactional
+    public void deleteLine(Long lineId) {
+        lineRepository.deleteById(lineId);
+    }
 }
