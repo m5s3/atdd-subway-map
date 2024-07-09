@@ -112,6 +112,44 @@ public class LineAcceptanceTest {
         assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId, thirdStationId, fourthStationId);
     }
 
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 관리자가 해당 노선을 조회하면,
+     * Then: 해당 노선의 정보가 반환된다.
+     */
+    @Test
+    @DisplayName("지하철 노선을 조회한다.")
+    void readLine() {
+        // Given
+        Long firstStationId = requestCreateStation("지하철역")
+                .jsonPath()
+                .getObject("id", Long.class);
+        Long secondStationId = requestCreateStation("새로운지하철")
+                .jsonPath()
+                .getObject("id", Long.class);
+
+        // When
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "신분당선");
+        params.put("color", "bg-red-600");
+        params.put("upStationId", firstStationId);
+        params.put("downStationId", secondStationId);
+        params.put("distance", 10);
+        Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
+
+        // Then
+        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
+                .log().all().extract().jsonPath();
+        Long findId = jsonPath.getObject("id", Long.class);
+        String findName = jsonPath.getObject("name", String.class);
+        assertThat(findId).isEqualTo(lineId);
+        assertThat(findName).isEqualTo(params.get("name"));
+
+        List<Integer> ids = jsonPath.getList("stations.id");
+        List<Long> stationIds = ids.stream().map(Long::valueOf).collect(Collectors.toList());
+        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId);
+    }
+
     private static ExtractableResponse<Response> requestCreateLine(Map<String, Object> params) {
         return RestAssured.given().log().all()
                 .body(params)

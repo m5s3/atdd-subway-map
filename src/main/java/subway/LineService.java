@@ -57,6 +57,13 @@ public class LineService {
                 .collect(Collectors.toList());
     }
 
+    public LineResponse findLine(Long lineId) {
+        Line line = lineRepository.findById(lineId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
+        Map<Long, Station> stations = fetchStations(fetchStationsIds(List.of(line)));
+        return new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance(), createStationsResponses(stations, line));
+    }
+
     private List<StationResponse> createStationsResponses(Map<Long, Station> stations, Line line) {
         Station upStation = stations.get(line.getUpStationId());
         Station downStation = stations.get(line.getDownStationId());
