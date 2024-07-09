@@ -80,4 +80,12 @@ public class LineService {
     private Map<Long, Station> fetchStations(List<Long> ids) {
         return new Stations(stationRepository.findStationsByIdIn(ids)).toMap();
     }
+
+    @Transactional
+    public void updateLine(Long lineId, LineRequest lineRequest) {
+        Line line = lineRepository.findById(lineId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
+
+        line.update(lineRequest);
+    }
 }

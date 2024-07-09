@@ -2,6 +2,7 @@ package subway;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -64,5 +65,24 @@ public class Line {
 
     public List<Long> getStationsIds() {
         return List.of(upStationId, downStationId);
+    }
+
+    public void update(LineRequest lineRequest) {
+        if (!Objects.isNull(lineRequest.getName())) {
+            this.name = lineRequest.getName();
+        }
+        if (!Objects.isNull(lineRequest.getColor())) {
+            this.color = lineRequest.getColor();
+        }
+        if (lineRequest.getDistance() > 0) {
+            this.distance = lineRequest.getDistance();
+        }
+        if (!Objects.isNull(lineRequest.getUpStationId())) {
+            this.upStationId = lineRequest.getUpStationId();
+        }
+
+        if (!Objects.isNull(lineRequest.getDownStationId())) {
+            this.downStationId = lineRequest.getDownStationId();
+        }
     }
 }

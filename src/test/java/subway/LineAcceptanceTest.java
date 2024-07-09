@@ -150,6 +150,65 @@ public class LineAcceptanceTest {
         assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId);
     }
 
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 관리자가 해당 노선을 수정하면,
+     * Then: 해당 노선의 정보가 수정된다.
+     */
+    @Test
+    @DisplayName("지하철 노선을 수정한다.")
+    void updateLine() {
+        // Given
+        Long firstStationId = requestCreateStation("지하철역")
+                .jsonPath()
+                .getObject("id", Long.class);
+        Long secondStationId = requestCreateStation("새로운지하철")
+                .jsonPath()
+                .getObject("id", Long.class);
+
+        Long thirdStationId = requestCreateStation("수정된지하철")
+                .jsonPath()
+                .getObject("id", Long.class);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "신분당선");
+        params.put("color", "bg-red-600");
+        params.put("upStationId", firstStationId);
+        params.put("downStationId", secondStationId);
+        params.put("distance", 10);
+        Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
+
+        // When
+        Map<String, Object> updateParams = new HashMap<>();
+        String updatedName = "update 신분당선";
+        String updatedColor = "update-bg-red-600";
+        int updateDistance = 15;
+        updateParams.put("name", updatedName);
+        updateParams.put("color", updatedColor);
+        updateParams.put("distance", updateDistance);
+        updateParams.put("downStationId", thirdStationId);
+
+        RestAssured.given().log().all().when()
+                .body(updateParams)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .post("/lines/" + lineId)
+                .then().log().all();
+
+        // Then
+        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
+                .log().all().extract().jsonPath();
+        Long findId = jsonPath.getObject("id", Long.class);
+        String findName = jsonPath.getObject("name", String.class);
+        String findColor = jsonPath.getObject("color", String.class);
+        assertThat(findId).isEqualTo(lineId);
+        assertThat(findName).isEqualTo(updatedName);
+        assertThat(findColor).isEqualTo(updatedColor);
+
+        List<Integer> ids = jsonPath.getList("stations.id");
+        List<Long> stationIds = ids.stream().map(Long::valueOf).collect(Collectors.toList());
+        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, thirdStationId);
+    }
+
     private static ExtractableResponse<Response> requestCreateLine(Map<String, Object> params) {
         return RestAssured.given().log().all()
                 .body(params)
