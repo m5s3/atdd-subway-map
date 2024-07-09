@@ -3,11 +3,18 @@ package subway;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -94,11 +101,16 @@ public class LineAcceptanceTest {
         Long secondLineId = requestCreateLine(secondParams).jsonPath().getObject("id", Long.class);
 
         // Then
-        List<Long> lineIds = RestAssured.given().log().all().when().get("/lines").then().log().all().extract().jsonPath()
-                .getList("id", Long.class);
+        ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
+                .extract();
+        List<Long> lineIds = response.jsonPath().getList("id", Long.class);
         assertThat(lineIds).containsExactlyInAnyOrder(firstLineId, secondLineId);
-    }
 
+        List<List<Integer>> ids = response.jsonPath().getList("stations.id");
+        ids.get(0).addAll(ids.get(1));
+        List<Long> stationIds = ids.get(0).stream().map(Long::valueOf).collect(Collectors.toList());
+        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId, thirdStationId, fourthStationId);
+    }
 
     private static ExtractableResponse<Response> requestCreateLine(Map<String, Object> params) {
         return RestAssured.given().log().all()
