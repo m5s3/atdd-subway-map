@@ -78,7 +78,6 @@ public class LineAcceptanceTest {
                 .jsonPath()
                 .getObject("id", Long.class);
 
-        // When
         Map<String, Object> firstParams = new HashMap<>();
         firstParams.put("name", "신분당선");
         firstParams.put("color", "bg-red-600");
@@ -95,9 +94,11 @@ public class LineAcceptanceTest {
         secondParams.put("distance", 25);
         Long secondLineId = requestCreateLine(secondParams).jsonPath().getObject("id", Long.class);
 
-        // Then
+        // When
         ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
                 .extract();
+
+        // Then
         List<Long> lineIds = response.jsonPath().getList("id", Long.class);
         assertThat(lineIds).containsExactlyInAnyOrder(firstLineId, secondLineId);
 
@@ -123,7 +124,6 @@ public class LineAcceptanceTest {
                 .jsonPath()
                 .getObject("id", Long.class);
 
-        // When
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
@@ -132,9 +132,11 @@ public class LineAcceptanceTest {
         params.put("distance", 10);
         Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
 
-        // Then
+        // When
         JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
                 .log().all().extract().jsonPath();
+
+        // Then
         Long findId = jsonPath.getObject("id", Long.class);
         String findName = jsonPath.getObject("name", String.class);
         assertThat(findId).isEqualTo(lineId);
