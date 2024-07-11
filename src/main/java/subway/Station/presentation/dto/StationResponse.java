@@ -1,4 +1,6 @@
-package subway;
+package subway.Station.presentation.dto;
+
+import subway.Station.domain.Station;
 
 public class StationResponse {
     private Long id;

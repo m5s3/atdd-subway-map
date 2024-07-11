@@ -1,6 +1,7 @@
-package subway;
+package subway.Line.presentation.dto;
 
 import java.util.List;
+import subway.Station.presentation.dto.StationResponse;
 
 public class LineResponse {
 

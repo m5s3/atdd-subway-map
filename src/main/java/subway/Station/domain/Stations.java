@@ -1,4 +1,4 @@
-package subway;
+package subway.Station.domain;
 
 import java.util.List;
 import java.util.Map;
