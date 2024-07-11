@@ -1,6 +1,5 @@
 package subway.Line.application;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,7 +13,6 @@ import subway.Line.infrastructure.LineRepository;
 import subway.Station.domain.Station;
 import subway.Station.infrastructure.StationRepository;
 import subway.Station.presentation.dto.StationResponse;
-import subway.Station.domain.Stations;
 
 @Service
 @Transactional(readOnly = true)
@@ -55,13 +53,6 @@ public class LineService {
     }
 
     public List<LineResponse> findAllLines() {
-        /**
-         *
-         *        return lines.stream()
-         *                 .map(Line::getStationsIds)
-         *                 .flatMap(List::stream)
-         *                 .collect(Collectors.toList());
-         */
         List<Line> lines = lineRepository.findAll();
         Map<Long, Station> stations = fetchStations(fetchStationsIds(lines));
 
@@ -69,27 +60,14 @@ public class LineService {
                 .map(line -> new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance()
                 ,createStationsResponses(stations, line)))
                 .collect(Collectors.toList());
-
-//        List<Long> stationsIds = lines.stream()
-//                .map(Line::getStationsIds)
-//                .flatMap(List::stream)
-//                .collect(Collectors.toList());
-//        Map<Long, Station> stations = fetchStations(stationsIds);
-
-
-
-//
-//        return lines.stream().map(line ->
-//                        new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance(),
-//                                createStationsResponses(stations, line))
-//                )
-//                .collect(Collectors.toList());
     }
 
     public LineResponse findLine(Long lineId) {
         Line line = lineRepository.findById(lineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
+
         Map<Long, Station> stations = fetchStations(fetchStationsIds(List.of(line)));
+
         return new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance(), createStationsResponses(stations, line));
     }
 
@@ -109,7 +87,12 @@ public class LineService {
     }
 
     private Map<Long, Station> fetchStations(List<Long> ids) {
-        return new Stations(stationRepository.findStationsByIdIn(ids)).toMap();
+        return toMap(stationRepository.findStationsByIdIn(ids));
+    }
+
+    private Map<Long, Station> toMap(List<Station> stations) {
+        return stations.stream()
+                .collect(Collectors.toMap(Station::getId, station -> station));
     }
 
     @Transactional
