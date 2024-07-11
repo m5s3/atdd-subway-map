@@ -55,13 +55,35 @@ public class LineService {
     }
 
     public List<LineResponse> findAllLines() {
+        /**
+         *
+         *        return lines.stream()
+         *                 .map(Line::getStationsIds)
+         *                 .flatMap(List::stream)
+         *                 .collect(Collectors.toList());
+         */
         List<Line> lines = lineRepository.findAll();
         Map<Long, Station> stations = fetchStations(fetchStationsIds(lines));
-        return lines.stream().map(line ->
-                        new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance(),
-                                createStationsResponses(stations, line))
-                )
+
+        return lines.stream()
+                .map(line -> new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance()
+                ,createStationsResponses(stations, line)))
                 .collect(Collectors.toList());
+
+//        List<Long> stationsIds = lines.stream()
+//                .map(Line::getStationsIds)
+//                .flatMap(List::stream)
+//                .collect(Collectors.toList());
+//        Map<Long, Station> stations = fetchStations(stationsIds);
+
+
+
+//
+//        return lines.stream().map(line ->
+//                        new LineResponse(line.getId(), line.getName(), line.getColor(), line.getDistance(),
+//                                createStationsResponses(stations, line))
+//                )
+//                .collect(Collectors.toList());
     }
 
     public LineResponse findLine(Long lineId) {
@@ -79,9 +101,11 @@ public class LineService {
     }
 
     private List<Long> fetchStationsIds(List<Line> lines) {
-        List<Long> ids = new ArrayList<>();
-        lines.forEach(line -> ids.addAll(line.getStationsIds()));
-        return ids.stream().distinct().collect(Collectors.toList());
+        return lines.stream()
+                .map(Line::getStationsIds)
+                .flatMap(List::stream)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     private Map<Long, Station> fetchStations(List<Long> ids) {
