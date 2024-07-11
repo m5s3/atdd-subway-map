@@ -51,7 +51,6 @@ public class LineAcceptanceTest {
         // Then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
         List<Long> stationIds = response.jsonPath().getList("stations.id", Long.class);
-        System.out.println("stationIds = " + stationIds);
         assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId);
     }
 
@@ -307,9 +306,7 @@ public class LineAcceptanceTest {
         ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
                 .extract();
 
-        System.out.println("lineId = " + lineId);
         List<Long> lineIds = response.jsonPath().getList("id", Long.class);
-        System.out.println("lineIds = " + lineIds);
         assertThat(lineIds).doesNotContain(lineId);
     }
 
