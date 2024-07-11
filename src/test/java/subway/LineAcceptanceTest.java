@@ -195,6 +195,84 @@ public class LineAcceptanceTest {
         assertThat(findColor).isEqualTo(updatedColor);
     }
 
+    @Test
+    @DisplayName("지하철 노선의 이름을 업데이트한다.")
+    void updateName() {
+        // Given
+        Long firstStationId = requestCreateStation("지하철역")
+                .jsonPath()
+                .getObject("id", Long.class);
+        Long secondStationId = requestCreateStation("새로운지하철")
+                .jsonPath()
+                .getObject("id", Long.class);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "신분당선");
+        params.put("color", "bg-red-600");
+        params.put("upStationId", firstStationId);
+        params.put("downStationId", secondStationId);
+        params.put("distance", 10);
+        Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
+
+        // When
+        Map<String, Object> updateParams = new HashMap<>();
+        String updatedName = "update 신분당선";
+        updateParams.put("name", updatedName);
+
+        RestAssured.given().log().all().when()
+                .body(updateParams)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .post("/lines/" + lineId)
+                .then().log().all();
+
+        // Then
+        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
+                .log().all().extract().jsonPath();
+        Long findId = jsonPath.getObject("id", Long.class);
+        String findName = jsonPath.getObject("name", String.class);
+        assertThat(findId).isEqualTo(lineId);
+        assertThat(findName).isEqualTo(updatedName);
+    }
+
+    @Test
+    @DisplayName("지하철 노선의 색깔을 업데이트한다.")
+    void updateColor() {
+        // Given
+        Long firstStationId = requestCreateStation("지하철역")
+                .jsonPath()
+                .getObject("id", Long.class);
+        Long secondStationId = requestCreateStation("새로운지하철")
+                .jsonPath()
+                .getObject("id", Long.class);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "신분당선");
+        params.put("color", "bg-red-600");
+        params.put("upStationId", firstStationId);
+        params.put("downStationId", secondStationId);
+        params.put("distance", 10);
+        Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
+
+        // When
+        Map<String, Object> updateParams = new HashMap<>();
+        String updatedColor = "update-bg-red-600";
+        updateParams.put("color", updatedColor);
+
+        RestAssured.given().log().all().when()
+                .body(updateParams)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .post("/lines/" + lineId)
+                .then().log().all();
+
+        // Then
+        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
+                .log().all().extract().jsonPath();
+        Long findId = jsonPath.getObject("id", Long.class);
+        String findColor = jsonPath.getObject("color", String.class);
+        assertThat(findId).isEqualTo(lineId);
+        assertThat(findColor).isEqualTo(updatedColor);
+    }
+
     /**
      * Given: 특정 지하철 노선이 등록되어 있고,
      * When: 관리자가 해당 노선을 삭제하면,

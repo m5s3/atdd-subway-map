@@ -65,12 +65,11 @@ public class Line {
         return List.of(upStationId, downStationId);
     }
 
-    public void update(LineRequest lineRequest) {
-        if (!Objects.isNull(lineRequest.getName())) {
-            this.name = lineRequest.getName();
-        }
-        if (!Objects.isNull(lineRequest.getColor())) {
-            this.color = lineRequest.getColor();
-        }
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateColor(String color) {
+        this.color = color;
     }
 }

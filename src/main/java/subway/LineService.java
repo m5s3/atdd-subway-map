@@ -3,6 +3,7 @@ package subway;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,14 @@ public class LineService {
         Line line = lineRepository.findById(lineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
 
-        line.update(lineRequest);
+        String name = lineRequest.getName();
+        if (Objects.nonNull(name)) {
+            line.updateName(name);
+        }
+        String color = lineRequest.getColor();
+        if (Objects.nonNull(color)) {
+            line.updateColor(color);
+        }
     }
 
     @Transactional
