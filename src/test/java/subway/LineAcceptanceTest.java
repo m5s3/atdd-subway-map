@@ -163,10 +163,6 @@ public class LineAcceptanceTest {
                 .jsonPath()
                 .getObject("id", Long.class);
 
-        Long thirdStationId = requestCreateStation("수정된지하철")
-                .jsonPath()
-                .getObject("id", Long.class);
-
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
@@ -179,11 +175,8 @@ public class LineAcceptanceTest {
         Map<String, Object> updateParams = new HashMap<>();
         String updatedName = "update 신분당선";
         String updatedColor = "update-bg-red-600";
-        int updateDistance = 15;
         updateParams.put("name", updatedName);
         updateParams.put("color", updatedColor);
-        updateParams.put("distance", updateDistance);
-        updateParams.put("downStationId", thirdStationId);
 
         RestAssured.given().log().all().when()
                 .body(updateParams)
@@ -200,10 +193,6 @@ public class LineAcceptanceTest {
         assertThat(findId).isEqualTo(lineId);
         assertThat(findName).isEqualTo(updatedName);
         assertThat(findColor).isEqualTo(updatedColor);
-
-        List<Integer> ids = jsonPath.getList("stations.id");
-        List<Long> stationIds = ids.stream().map(Long::valueOf).collect(Collectors.toList());
-        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, thirdStationId);
     }
 
     /**

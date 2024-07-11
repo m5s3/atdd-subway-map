@@ -72,15 +72,5 @@ public class Line {
         if (!Objects.isNull(lineRequest.getColor())) {
             this.color = lineRequest.getColor();
         }
-        if (lineRequest.getDistance() > 0) {
-            this.distance = lineRequest.getDistance();
-        }
-        if (!Objects.isNull(lineRequest.getUpStationId())) {
-            this.upStationId = lineRequest.getUpStationId();
-        }
-
-        if (!Objects.isNull(lineRequest.getDownStationId())) {
-            this.downStationId = lineRequest.getDownStationId();
-        }
     }
 }
