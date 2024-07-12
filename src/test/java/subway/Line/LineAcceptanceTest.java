@@ -1,4 +1,4 @@
-package subway;
+package subway.Line;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayName("지하철 노선 관련 기능")
 @Sql(scripts = {"/truncate.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -32,10 +33,10 @@ public class LineAcceptanceTest {
     @Test
     void createLine() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                                         .jsonPath()
                                         .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                                         .jsonPath()
                                         .getObject("id", Long.class);
 
@@ -43,15 +44,15 @@ public class LineAcceptanceTest {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", firstStationId);
-        params.put("downStationId", secondStationId);
+        params.put("upStationId", 신사역);
+        params.put("downStationId", 강남역);
         params.put("distance", 10);
         ExtractableResponse<Response> response = requestCreateLine(params);
 
         // Then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
         List<Long> stationIds = response.jsonPath().getList("stations.id", Long.class);
-        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId);
+        assertThat(stationIds).containsExactlyInAnyOrder(신사역, 강남역);
     }
 
     /**
@@ -63,35 +64,35 @@ public class LineAcceptanceTest {
     @Test
     void readLines() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                 .jsonPath()
                 .getObject("id", Long.class);
 
-        Long thirdStationId = requestCreateStation("지하철역2")
+        Long 청량리 = requestCreateStation("청량리")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long fourthStationId = requestCreateStation("새로운지하철2")
+        Long 서울숲 = requestCreateStation("서울숲")
                 .jsonPath()
                 .getObject("id", Long.class);
 
         Map<String, Object> firstParams = new HashMap<>();
         firstParams.put("name", "신분당선");
         firstParams.put("color", "bg-red-600");
-        firstParams.put("upStationId", firstStationId);
-        firstParams.put("downStationId", secondStationId);
+        firstParams.put("upStationId", 신사역);
+        firstParams.put("downStationId", 강남역);
         firstParams.put("distance", 10);
-        Long firstLineId = requestCreateLine(firstParams).jsonPath().getObject("id", Long.class);
+        Long 신분당선 = requestCreateLine(firstParams).jsonPath().getObject("id", Long.class);
 
         Map<String, Object> secondParams = new HashMap<>();
-        secondParams.put("name", "신분당선2");
+        secondParams.put("name", "분당선");
         secondParams.put("color", "bg-red-700");
-        secondParams.put("upStationId", thirdStationId);
-        secondParams.put("downStationId", fourthStationId);
+        secondParams.put("upStationId", 청량리);
+        secondParams.put("downStationId", 서울숲);
         secondParams.put("distance", 25);
-        Long secondLineId = requestCreateLine(secondParams).jsonPath().getObject("id", Long.class);
+        Long 분당선 = requestCreateLine(secondParams).jsonPath().getObject("id", Long.class);
 
         // When
         ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
@@ -99,12 +100,12 @@ public class LineAcceptanceTest {
 
         // Then
         List<Long> lineIds = response.jsonPath().getList("id", Long.class);
-        assertThat(lineIds).containsExactlyInAnyOrder(firstLineId, secondLineId);
+        assertThat(lineIds).containsExactlyInAnyOrder(신분당선, 분당선);
 
         List<List<Integer>> ids = response.jsonPath().getList("stations.id");
         ids.get(0).addAll(ids.get(1));
         List<Long> stationIds = ids.get(0).stream().map(Long::valueOf).collect(Collectors.toList());
-        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId, thirdStationId, fourthStationId);
+        assertThat(stationIds).containsExactlyInAnyOrder(신사역, 강남역, 청량리, 서울숲);
     }
 
     /**
@@ -116,18 +117,18 @@ public class LineAcceptanceTest {
     @DisplayName("지하철 노선을 조회한다.")
     void readLine() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                 .jsonPath()
                 .getObject("id", Long.class);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", firstStationId);
-        params.put("downStationId", secondStationId);
+        params.put("upStationId", 신사역);
+        params.put("downStationId", 강남역);
         params.put("distance", 10);
         Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
 
@@ -143,7 +144,7 @@ public class LineAcceptanceTest {
 
         List<Integer> ids = jsonPath.getList("stations.id");
         List<Long> stationIds = ids.stream().map(Long::valueOf).collect(Collectors.toList());
-        assertThat(stationIds).containsExactlyInAnyOrder(firstStationId, secondStationId);
+        assertThat(stationIds).containsExactlyInAnyOrder(신사역, 강남역);
     }
 
     /**
@@ -155,27 +156,27 @@ public class LineAcceptanceTest {
     @DisplayName("지하철 노선을 수정한다.")
     void updateLine() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                 .jsonPath()
                 .getObject("id", Long.class);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", firstStationId);
-        params.put("downStationId", secondStationId);
+        params.put("upStationId", 신사역);
+        params.put("downStationId", 강남역);
         params.put("distance", 10);
         Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
 
         // When
         Map<String, Object> updateParams = new HashMap<>();
-        String updatedName = "update 신분당선";
-        String updatedColor = "update-bg-red-600";
-        updateParams.put("name", updatedName);
-        updateParams.put("color", updatedColor);
+        String UPDATE_신분당선 = "update 신분당선";
+        String UPDATE_색깔 = "update-bg-red-600";
+        updateParams.put("name", UPDATE_신분당선);
+        updateParams.put("color", UPDATE_색깔);
 
         RestAssured.given().log().all().when()
                 .body(updateParams)
@@ -186,37 +187,37 @@ public class LineAcceptanceTest {
         // Then
         JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
                 .log().all().extract().jsonPath();
-        Long findId = jsonPath.getObject("id", Long.class);
-        String findName = jsonPath.getObject("name", String.class);
-        String findColor = jsonPath.getObject("color", String.class);
-        assertThat(findId).isEqualTo(lineId);
-        assertThat(findName).isEqualTo(updatedName);
-        assertThat(findColor).isEqualTo(updatedColor);
+        Long 신분당선_ID = jsonPath.getObject("id", Long.class);
+        String 신분당선_이름 = jsonPath.getObject("name", String.class);
+        String 신분당선_색깔 = jsonPath.getObject("color", String.class);
+        assertThat(신분당선_ID).isEqualTo(lineId);
+        assertThat(신분당선_이름).isEqualTo(UPDATE_신분당선);
+        assertThat(신분당선_색깔).isEqualTo(UPDATE_색깔);
     }
 
     @Test
     @DisplayName("지하철 노선의 이름을 업데이트한다.")
     void updateName() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                 .jsonPath()
                 .getObject("id", Long.class);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", firstStationId);
-        params.put("downStationId", secondStationId);
+        params.put("upStationId", 신사역);
+        params.put("downStationId", 강남역);
         params.put("distance", 10);
         Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
 
         // When
         Map<String, Object> updateParams = new HashMap<>();
-        String updatedName = "update 신분당선";
-        updateParams.put("name", updatedName);
+        String UPDATE_이름 = "update 신분당선";
+        updateParams.put("name", UPDATE_이름);
 
         RestAssured.given().log().all().when()
                 .body(updateParams)
@@ -227,35 +228,35 @@ public class LineAcceptanceTest {
         // Then
         JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
                 .log().all().extract().jsonPath();
-        Long findId = jsonPath.getObject("id", Long.class);
-        String findName = jsonPath.getObject("name", String.class);
-        assertThat(findId).isEqualTo(lineId);
-        assertThat(findName).isEqualTo(updatedName);
+        Long 분당선_ID = jsonPath.getObject("id", Long.class);
+        String 분당선_이름 = jsonPath.getObject("name", String.class);
+        assertThat(분당선_ID).isEqualTo(lineId);
+        assertThat(분당선_이름).isEqualTo(UPDATE_이름);
     }
 
     @Test
     @DisplayName("지하철 노선의 색깔을 업데이트한다.")
     void updateColor() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                 .jsonPath()
                 .getObject("id", Long.class);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", firstStationId);
-        params.put("downStationId", secondStationId);
+        params.put("upStationId", 신사역);
+        params.put("downStationId", 강남역);
         params.put("distance", 10);
         Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
 
         // When
         Map<String, Object> updateParams = new HashMap<>();
-        String updatedColor = "update-bg-red-600";
-        updateParams.put("color", updatedColor);
+        String UPDATE_색깔 = "update-bg-red-600";
+        updateParams.put("color", UPDATE_색깔);
 
         RestAssured.given().log().all().when()
                 .body(updateParams)
@@ -266,10 +267,10 @@ public class LineAcceptanceTest {
         // Then
         JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + lineId).then()
                 .log().all().extract().jsonPath();
-        Long findId = jsonPath.getObject("id", Long.class);
-        String findColor = jsonPath.getObject("color", String.class);
-        assertThat(findId).isEqualTo(lineId);
-        assertThat(findColor).isEqualTo(updatedColor);
+        Long 분당선_ID = jsonPath.getObject("id", Long.class);
+        String 분당선_색깔 = jsonPath.getObject("color", String.class);
+        assertThat(분당선_ID).isEqualTo(lineId);
+        assertThat(분당선_색깔).isEqualTo(UPDATE_색깔);
     }
 
     /**
@@ -281,18 +282,18 @@ public class LineAcceptanceTest {
     @DisplayName("지하철 노선을 삭제한다.")
     void deleteLine() {
         // Given
-        Long firstStationId = requestCreateStation("지하철역")
+        Long 신사역 = requestCreateStation("신사역")
                 .jsonPath()
                 .getObject("id", Long.class);
-        Long secondStationId = requestCreateStation("새로운지하철")
+        Long 강남역 = requestCreateStation("강남역")
                 .jsonPath()
                 .getObject("id", Long.class);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "신분당선");
         params.put("color", "bg-red-600");
-        params.put("upStationId", firstStationId);
-        params.put("downStationId", secondStationId);
+        params.put("upStationId", 신사역);
+        params.put("downStationId", 강남역);
         params.put("distance", 10);
         Long lineId = requestCreateLine(params).jsonPath().getObject("id", Long.class);
 
