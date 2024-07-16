@@ -75,21 +75,22 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @Test
     void readLines() {
         // Given
-        Long 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
-        Long 분당선 = requestCreateLine(분당선_생성(청량리, 서울숲)).jsonPath().getObject("id", Long.class);
+        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        var 분당선 = requestCreateLine(분당선_생성(청량리, 서울숲)).jsonPath().getObject("id", Long.class);
 
         // When
         ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
                 .extract();
 
         // Then
-        List<Long> lineIds = response.jsonPath().getList("id", Long.class);
+        var lineIds = response.jsonPath().getList("id", Long.class);
         assertThat(lineIds).containsExactlyInAnyOrder(신분당선, 분당선);
 
         List<List<Integer>> ids = response.jsonPath().getList("stations.id");
-        ids.get(0).addAll(ids.get(1));
-        List<Long> stationIds = ids.get(0).stream().map(Long::valueOf).collect(Collectors.toList());
-        assertThat(stationIds).containsExactlyInAnyOrder(신사역, 강남역, 청량리, 서울숲);
+        List<Long> stationsIds = ids.stream().flatMap(list -> list.stream())
+                        .map(Long::valueOf)
+                        .collect(Collectors.toList());
+        assertThat(stationsIds).containsExactlyInAnyOrder(신사역, 강남역, 청량리, 서울숲);
     }
 
     /**
@@ -101,20 +102,20 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @DisplayName("지하철 노선을 조회한다.")
     void readLine() {
         // Given
-        Long 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
 
         // When
         JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
                 .log().all().extract().jsonPath();
 
         // Then
-        Long findId = jsonPath.getObject("id", Long.class);
-        String findName = jsonPath.getObject("name", String.class);
+        var findId = jsonPath.getObject("id", Long.class);
+        var findName = jsonPath.getObject("name", String.class);
         assertThat(findId).isEqualTo(신분당선);
         assertThat(findName).isEqualTo("신분당선");
 
-        List<Integer> ids = jsonPath.getList("stations.id");
-        List<Long> stationIds = ids.stream().map(Long::valueOf).collect(Collectors.toList());
+        var ids = jsonPath.getList("stations.id");
+        var stationIds = ids.stream().map(id -> Long.valueOf((int)id)).collect(Collectors.toList());
         assertThat(stationIds).containsExactlyInAnyOrder(신사역, 강남역);
     }
 
@@ -127,10 +128,10 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @DisplayName("지하철 노선을 수정한다.")
     void updateLine() {
         // Given
-        Long 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
 
         // When
-        Map<String, Object> updateParams = new HashMap<>();
+        var updateParams = new HashMap<String, Object>();
         String UPDATE_신분당선 = "update 신분당선";
         String UPDATE_색깔 = "update-bg-red-600";
         updateParams.put("name", UPDATE_신분당선);
@@ -143,11 +144,11 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
                 .then().log().all();
 
         // Then
-        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
+        var jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
                 .log().all().extract().jsonPath();
-        Long find_신분당선 = jsonPath.getObject("id", Long.class);
-        String find_신분당선_이름 = jsonPath.getObject("name", String.class);
-        String find_신분당선_색깔 = jsonPath.getObject("color", String.class);
+        var find_신분당선 = jsonPath.getObject("id", Long.class);
+        var find_신분당선_이름 = jsonPath.getObject("name", String.class);
+        var find_신분당선_색깔 = jsonPath.getObject("color", String.class);
         assertThat(find_신분당선).isEqualTo(신분당선);
         assertThat(find_신분당선_이름).isEqualTo(UPDATE_신분당선);
         assertThat(find_신분당선_색깔).isEqualTo(UPDATE_색깔);
@@ -157,11 +158,11 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @DisplayName("지하철 노선의 이름을 업데이트한다.")
     void updateName() {
         // Given
-        Long 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
 
         // When
-        Map<String, Object> updateParams = new HashMap<>();
-        String UPDATE_이름 = "update 신분당선";
+        var updateParams = new HashMap<String, Object>();
+        var UPDATE_이름 = "update 신분당선";
         updateParams.put("name", UPDATE_이름);
 
         RestAssured.given().log().all().when()
@@ -171,10 +172,10 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
                 .then().log().all();
 
         // Then
-        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
+        var jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
                 .log().all().extract().jsonPath();
-        Long find_분당선 = jsonPath.getObject("id", Long.class);
-        String find_분당선_이름 = jsonPath.getObject("name", String.class);
+        var find_분당선 = jsonPath.getObject("id", Long.class);
+        var find_분당선_이름 = jsonPath.getObject("name", String.class);
         assertThat(find_분당선).isEqualTo(신분당선);
         assertThat(find_분당선_이름).isEqualTo(UPDATE_이름);
     }
@@ -183,11 +184,11 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @DisplayName("지하철 노선의 색깔을 업데이트한다.")
     void updateColor() {
         // Given
-        Long 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
 
         // When
-        Map<String, Object> updateParams = new HashMap<>();
-        String UPDATE_색깔 = "update-bg-red-600";
+        var updateParams = new HashMap<String, Object>();
+        var UPDATE_색깔 = "update-bg-red-600";
         updateParams.put("color", UPDATE_색깔);
 
         RestAssured.given().log().all().when()
@@ -197,10 +198,10 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
                 .then().log().all();
 
         // Then
-        JsonPath jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
+        var jsonPath = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
                 .log().all().extract().jsonPath();
-        Long find_분당선 = jsonPath.getObject("id", Long.class);
-        String find_분당선_색깔 = jsonPath.getObject("color", String.class);
+        var find_분당선 = jsonPath.getObject("id", Long.class);
+        var find_분당선_색깔 = jsonPath.getObject("color", String.class);
         assertThat(find_분당선).isEqualTo(신분당선);
         assertThat(find_분당선_색깔).isEqualTo(UPDATE_색깔);
     }
@@ -214,7 +215,7 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @DisplayName("지하철 노선을 삭제한다.")
     void deleteLine() {
         // Given
-        Long 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
 
         // When
         RestAssured.given().log().all()
@@ -226,8 +227,41 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
         ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
                 .extract();
 
-        List<Long> findLineID = response.jsonPath().getList("id", Long.class);
+        var findLineID = response.jsonPath().getList("id", Long.class);
         assertThat(findLineID).doesNotContain(신분당선);
+    }
+
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 새로운 구간의 상행역이 기존 노선의 하행 종점역이 아니면,
+     * Then: 예외가 발생한다.
+     */
+    @Test
+    @DisplayName("하행 종점역 예외 발생")
+    void createSection_하행_종점역_예외발생() {
+
+    }
+
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 새로운 구간의 상행역이 기존 노선의 하행 종점역이 아니면,
+     * Then: 예외가 발생한다.
+     */
+    @Test
+    @DisplayName("상행역이 기존 노선의 하행 종점역이 아니면 예외 발생")
+    void createSection_상행역이_기존_노선의_하행_종점역이_아니면_예외발생() {
+
+    }
+
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 기존 노선의 하행 종점역이 새로운 구간의 하행역이 되면,
+     * Then: 예외가 발생한다.
+     */
+    @Test
+    @DisplayName("기존 노선의 하행 종점역이 새로운 구간의 하행역이 되면 예외 발생")
+    void createSection_기존_노선의_하행_종점역이_새로운_구간의_하행역이_되면_예외_발생() {
+
     }
 
     private static ExtractableResponse<Response> requestCreateLine(Map<String, Object> params) {
