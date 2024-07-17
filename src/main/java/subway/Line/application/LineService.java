@@ -10,6 +10,7 @@ import subway.Line.domain.Line;
 import subway.Line.presentation.dto.LineRequest;
 import subway.Line.presentation.dto.LineResponse;
 import subway.Line.infrastructure.LineRepository;
+import subway.Line.presentation.dto.SectionRequest;
 import subway.Station.domain.Station;
 import subway.Station.infrastructure.StationRepository;
 import subway.Station.presentation.dto.StationResponse;
@@ -113,5 +114,11 @@ public class LineService {
     @Transactional
     public void deleteLine(Long lineId) {
         lineRepository.deleteById(lineId);
+    }
+
+    public void addSection(Long lineId, SectionRequest sectionRequest) {
+        Line line = this.lineRepository.findById(lineId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
+        line.addSection(sectionRequest.getUpStationId(), sectionRequest.getDownStationId(), sectionRequest.getDistance());
     }
 }

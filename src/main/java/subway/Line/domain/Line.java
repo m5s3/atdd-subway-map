@@ -71,4 +71,10 @@ public class Line {
     public void updateColor(String color) {
         this.color = color;
     }
+
+    public void addSection(Long upStationId, Long downStationId, int distance) {
+        if (!this.downStationId.equals(upStationId)) {
+            throw new IllegalArgumentException("기존 구간의 하행 종점역이 새로운 구간 상행역이 되어야 합니다.");
+        }
+    }
 }

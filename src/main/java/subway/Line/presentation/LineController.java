@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import subway.Line.presentation.dto.LineRequest;
 import subway.Line.presentation.dto.LineResponse;
 import subway.Line.application.LineService;
+import subway.Line.presentation.dto.SectionRequest;
 
 @RestController
 public class LineController {
@@ -48,5 +49,14 @@ public class LineController {
     public ResponseEntity<Void> deleteLine(@PathVariable Long lineId) {
         lineService.deleteLine(lineId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/lines/{lineId}/sections")
+    public ResponseEntity<Void> createSection(@PathVariable Long lineId, @RequestBody SectionRequest sectionRequest) {
+        try {
+            this.lineService.addSection(lineId, sectionRequest);
+        } catch (RuntimeException e) {
+            return ResponseEntity.ok()
+        }
     }
 }

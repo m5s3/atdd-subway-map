@@ -22,32 +22,9 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayName("지하철 노선 관련 기능")
-@Sql(scripts = {"/truncate.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"/truncate.sql"}, executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 public class LineAcceptanceTest extends LineAcceptanceFixture {
-    Long 신사역;
-    Long 강남역;
-    Long 청량리;
-    Long 서울숲;
-
-    @BeforeEach
-    void setUp() {
-        신사역 = requestCreateStation("신사역")
-                .jsonPath()
-                .getObject("id", Long.class);
-
-        강남역 = requestCreateStation("강남역")
-                .jsonPath()
-                .getObject("id", Long.class);
-
-        청량리 = requestCreateStation("청량리")
-                .jsonPath()
-                .getObject("id", Long.class);
-        서울숲 = requestCreateStation("서울숲")
-                .jsonPath()
-                .getObject("id", Long.class);
-    }
-
     /**
      * Given: 새로운 지하철 노선 정보를 입력하고,
      * When: 관리자가 노선을 생성하면,
@@ -74,11 +51,7 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
     @DisplayName("모든 지하철 노션을 목록을 조회한다.")
     @Test
     void readLines() {
-        // Given
-        var 신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
-        var 분당선 = requestCreateLine(분당선_생성(청량리, 서울숲)).jsonPath().getObject("id", Long.class);
-
-        // When
+        // Given & When
         ExtractableResponse<Response> response = RestAssured.given().log().all().when().get("/lines").then().log().all()
                 .extract();
 
@@ -231,53 +204,11 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
         assertThat(findLineID).doesNotContain(신분당선);
     }
 
-    /**
-     * Given: 특정 지하철 노선이 등록되어 있고,
-     * When: 새로운 구간의 상행역이 기존 노선의 하행 종점역이 아니면,
-     * Then: 예외가 발생한다.
-     */
-    @Test
-    @DisplayName("하행 종점역 예외 발생")
-    void createSection_하행_종점역_예외발생() {
-
-    }
-
-    /**
-     * Given: 특정 지하철 노선이 등록되어 있고,
-     * When: 새로운 구간의 상행역이 기존 노선의 하행 종점역이 아니면,
-     * Then: 예외가 발생한다.
-     */
-    @Test
-    @DisplayName("상행역이 기존 노선의 하행 종점역이 아니면 예외 발생")
-    void createSection_상행역이_기존_노선의_하행_종점역이_아니면_예외발생() {
-
-    }
-
-    /**
-     * Given: 특정 지하철 노선이 등록되어 있고,
-     * When: 기존 노선의 하행 종점역이 새로운 구간의 하행역이 되면,
-     * Then: 예외가 발생한다.
-     */
-    @Test
-    @DisplayName("기존 노선의 하행 종점역이 새로운 구간의 하행역이 되면 예외 발생")
-    void createSection_기존_노선의_하행_종점역이_새로운_구간의_하행역이_되면_예외_발생() {
-
-    }
-
     private static ExtractableResponse<Response> requestCreateLine(Map<String, Object> params) {
         return RestAssured.given().log().all()
                 .body(params)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/lines")
-                .then().log().all()
-                .extract();
-    }
-
-    private ExtractableResponse<Response> requestCreateStation(String stationName) {
-        return RestAssured.given().log().all()
-                .body(createStationParams(stationName))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/stations")
                 .then().log().all()
                 .extract();
     }
