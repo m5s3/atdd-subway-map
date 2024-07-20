@@ -2,6 +2,7 @@ package subway.Line.presentation;
 
 import java.net.URI;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,9 +55,10 @@ public class LineController {
     @PostMapping("/lines/{lineId}/sections")
     public ResponseEntity<Void> createSection(@PathVariable Long lineId, @RequestBody SectionRequest sectionRequest) {
         try {
-            this.lineService.addSection(lineId, sectionRequest);
+            lineService.addSection(lineId, sectionRequest);
+            return ResponseEntity.created(URI.create("/lines/" + lineId + "/sections")).build();
         } catch (RuntimeException e) {
-            return ResponseEntity.ok()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 }

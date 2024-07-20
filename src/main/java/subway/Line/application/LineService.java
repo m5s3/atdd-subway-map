@@ -116,6 +116,7 @@ public class LineService {
         lineRepository.deleteById(lineId);
     }
 
+    @Transactional
     public void addSection(Long lineId, SectionRequest sectionRequest) {
         Line line = this.lineRepository.findById(lineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));

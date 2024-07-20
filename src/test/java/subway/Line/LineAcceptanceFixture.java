@@ -47,7 +47,7 @@ public class LineAcceptanceFixture {
                 .jsonPath()
                 .getObject("id", Long.class);
 
-        신분당선 = requestCreateLine(신분당선_생성(신사역, 강남역)).jsonPath().getObject("id", Long.class);
+        신분당선 = requestCreateLine(신분당선_생성(신사역, 논현역)).jsonPath().getObject("id", Long.class);
         분당선 = requestCreateLine(분당선_생성(청량리, 서울숲)).jsonPath().getObject("id", Long.class);
     }
 
