@@ -96,7 +96,7 @@ public class Line {
         }
         this.sections.add(new Section(upStationId, downStationId, distance, this));
         this.distance = calculateDistance();
-        System.out.println("this.distance = " + this.distance);
+        this.downStationId = downStationId;
     }
 
     private int calculateDistance() {
