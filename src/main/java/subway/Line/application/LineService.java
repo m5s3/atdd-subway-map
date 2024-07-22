@@ -131,10 +131,9 @@ public class LineService {
     public void deleteSection(Long lineId, Long stationId) {
         Line line = this.lineRepository.findById(lineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
-        List<Section> sections = this.sectionRepository.findByLine(line);
-        Section deleteSection = sections.stream()
-                                        .filter(section -> section.isDownStationId(stationId)).findAny()
-                                        .orElseThrow(() -> new IllegalArgumentException(
+
+        Section deleteSection = this.sectionRepository.findByLineAndDownStationId(line, stationId)
+                                                .orElseThrow(() -> new IllegalArgumentException(
                                                 "해당 노선은 해당 역을 마지막 구간으로 가지고 있지 않습니다. stationId=" + stationId));
         line.deleteSection(deleteSection);
     }
