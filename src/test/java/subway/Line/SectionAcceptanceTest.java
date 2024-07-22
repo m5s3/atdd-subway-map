@@ -95,6 +95,74 @@ public class SectionAcceptanceTest extends LineAcceptanceFixture {
         assertThat(노선_하행_종점역).isEqualTo(양재역);
     }
 
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 노선의 마지막 구간이 아닌 구간을 제거하면,
+     * Then: 예외가 발생한다.
+     */
+    @Test
+    @DisplayName("노선의 마지막 구간이 아닌 구간을 제거하면 예외가 발생한다")
+    void deleteSection_노선의_마지막_구간이_아닌_구간을_제거하면_예외_발생() {
+        // Given
+        createSection(신분당선, 논현역, 양재역, 10);
+
+        // When
+        ExtractableResponse<Response> response = RestAssured.given().log().all().when()
+                .queryParam("stationId", 논현역)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .delete("/lines/" + 신분당선 + "/sections")
+                .then().log().all().extract();
+
+        // Then
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 구간이 1개일때 삭제를 하면,
+     * Then: 예외가 발생한다.
+     */
+    @Test
+    @DisplayName("노선의 마지막 구간이 아닌 구간을 제거하면 예외가 발생한다")
+    void deleteSection_구간이_한개일때_구간을_제거하면_예외_발생() {
+        // Given & When
+        ExtractableResponse<Response> response = RestAssured.given().log().all().when()
+                .queryParam("stationId", 논현역)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .delete("/lines/" + 신분당선 + "/sections")
+                .then().log().all().extract();
+
+        // Then
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    /**
+     * Given: 특정 지하철 노선이 등록되어 있고,
+     * When: 마지막 구간을 삭제를 하면,
+     * Then: 기존의 하행 종점역은 삭제가 되고, 삭제된 구간의 상행역이 하행 종점역이 된다.
+     */
+    @Test
+    @DisplayName("구간을_삭제하면_삭제된_구간_상행역이_하행_종점역이_된다")
+    void deleteSection_구간을_삭제하면_삭제된_구간_상행역이_하행_종점역이_된다() {
+        // Given
+        createSection(신분당선, 논현역, 양재역, 10);
+
+        // When
+        ExtractableResponse<Response> response = RestAssured.given().log().all().when()
+                .queryParam("stationId", 양재역)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .delete("/lines/" + 신분당선 + "/sections")
+                .then().log().all().extract();
+
+        // Then
+        var ids = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
+                .log().all().extract().jsonPath().getList("stations.id");
+        var stationIds = ids.stream().map(id -> Long.valueOf((int)id)).collect(Collectors.toList());
+        var 노선_하행_종점역 = stationIds.get(stationIds.size() - 1);
+
+        assertThat(노선_하행_종점역).isEqualTo(논현역);
+    }
+
     private ExtractableResponse<Response> createSection(Long lineId, Long upStationId, Long downStationId, int distance) {
         return RestAssured.given().log().all().when()
                 .body(createSectionParam(upStationId, downStationId, distance))

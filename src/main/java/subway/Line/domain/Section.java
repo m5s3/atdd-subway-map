@@ -1,6 +1,7 @@
 package subway.Line.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,7 +18,7 @@ public class Section {
     private Long downStationId;
     private int distance;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "line_id")
     private Line line;
 
@@ -35,8 +36,28 @@ public class Section {
         this.line = line;
     }
 
+    public Long getUpStationId() {
+        return upStationId;
+    }
+
+    public Long getDownStationId() {
+        return downStationId;
+    }
+
+    public boolean isDownStationId(Long stationId) {
+        return downStationId.equals(stationId);
+    }
+
+    public void remove() {
+        this.line = null;
+    }
+
     public int getDistance() {
         return distance;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override

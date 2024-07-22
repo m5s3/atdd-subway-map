@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import subway.Line.domain.Line;
+import subway.Line.domain.Section;
+import subway.Line.infrastructure.SectionRepository;
 import subway.Line.presentation.dto.LineRequest;
 import subway.Line.presentation.dto.LineResponse;
 import subway.Line.infrastructure.LineRepository;
@@ -21,10 +23,12 @@ public class LineService {
 
     private final LineRepository lineRepository;
     private final StationRepository stationRepository;
+    private final SectionRepository sectionRepository;
 
-    public LineService(LineRepository lineRepository, StationRepository stationRepository) {
+    public LineService(LineRepository lineRepository, StationRepository stationRepository, SectionRepository sectionRepository) {
         this.lineRepository = lineRepository;
         this.stationRepository = stationRepository;
+        this.sectionRepository = sectionRepository;
     }
 
     @Transactional
@@ -121,5 +125,17 @@ public class LineService {
         Line line = this.lineRepository.findById(lineId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
         line.addSection(sectionRequest.getUpStationId(), sectionRequest.getDownStationId(), sectionRequest.getDistance());
+    }
+
+    @Transactional
+    public void deleteSection(Long lineId, Long stationId) {
+        Line line = this.lineRepository.findById(lineId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지하철 노선은 존재하지 않습니다. id=" + lineId));
+        List<Section> sections = this.sectionRepository.findByLine(line);
+        Section deleteSection = sections.stream()
+                                        .filter(section -> section.isDownStationId(stationId)).findAny()
+                                        .orElseThrow(() -> new IllegalArgumentException(
+                                                "해당 노선은 해당 역을 마지막 구간으로 가지고 있지 않습니다. stationId=" + stationId));
+        line.deleteSection(deleteSection);
     }
 }

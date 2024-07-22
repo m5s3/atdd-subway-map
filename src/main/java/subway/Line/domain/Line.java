@@ -2,6 +2,7 @@ package subway.Line.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -99,8 +100,21 @@ public class Line {
         this.downStationId = downStationId;
     }
 
+    public void deleteSection(Section section) {
+        if (!this.downStationId.equals(section.getDownStationId())) {
+            throw new IllegalArgumentException("마지막 구간만 삭제 할 수 있습니다.");
+        }
+
+        if (this.sections.size() < 2) {
+            throw new IllegalArgumentException("구간이 1개일 경우 삭제 할 수 없습니다.");
+        }
+
+        this.downStationId = section.getUpStationId();
+        section.remove();
+        this.sections.remove(section);
+    }
+
     private int calculateDistance() {
-        System.out.println("this.sections = " + this.sections);
         return this.sections.stream()
                 .mapToInt(Section::getDistance).sum();
     }
