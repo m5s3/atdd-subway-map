@@ -2,7 +2,6 @@ package subway.Line.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,8 +43,6 @@ public class Line {
         this.color = color;
         this.upStationId = upStationId;
         this.downStationId = downStationId;
-        System.out.println("downStationId = " + downStationId);
-        System.out.println("upStationId = " + upStationId);
         this.addSection(upStationId, downStationId, distance);
     }
 
