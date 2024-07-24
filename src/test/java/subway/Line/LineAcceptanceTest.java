@@ -62,7 +62,8 @@ public class LineAcceptanceTest extends LineAcceptanceFixture {
         List<Long> stationsIds = ids.stream().flatMap(list -> list.stream())
                         .map(Long::valueOf)
                         .collect(Collectors.toList());
-        assertThat(stationsIds).containsExactlyInAnyOrder(신사역, 강남역, 청량리, 서울숲);
+
+        assertThat(stationsIds).containsExactlyInAnyOrder(신사역, 논현역, 청량리, 서울숲);
     }
 
     /**
