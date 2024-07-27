@@ -4,6 +4,7 @@ import static subway.global.exception.ExceptionCode.INVALID_DELETE_DOWNSTATION;
 import static subway.global.exception.ExceptionCode.INVALID_DOWNSTATION_NOT_NEW_EQUAL_DOWNSTATION;
 import static subway.global.exception.ExceptionCode.INVALID_DOWNSTATION_TO_BE_NEW_UPSTATION;
 import static subway.global.exception.ExceptionCode.INVALID_SECTION_MIN;
+import static subway.global.exception.ExceptionCode.NOT_FOUND_STATION;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,8 +104,11 @@ public class Line {
         this.downStationId = downStationId;
     }
 
-    public void deleteSection(Section section) {
-        if (!this.downStationId.equals(section.getDownStationId())) {
+    public void deleteSection(Long stationId) {
+        Section deleteSection = sections.stream().filter(section -> section.isDownStationId(stationId)).findAny()
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND_STATION));
+
+        if (!this.downStationId.equals(deleteSection.getDownStationId())) {
             throw new BadRequestException(INVALID_DELETE_DOWNSTATION);
         }
 
@@ -112,9 +116,9 @@ public class Line {
             throw new BadRequestException(INVALID_SECTION_MIN);
         }
 
-        this.downStationId = section.getUpStationId();
-        section.remove();
-        this.sections.remove(section);
+        this.downStationId = deleteSection.getUpStationId();
+        deleteSection.remove();
+        this.sections.remove(deleteSection);
     }
 
     private int calculateDistance() {

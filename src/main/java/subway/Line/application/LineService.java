@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import subway.Line.domain.Line;
-import subway.Line.domain.Section;
-import subway.Line.infrastructure.SectionRepository;
 import subway.Line.presentation.dto.LineRequest;
 import subway.Line.presentation.dto.LineResponse;
 import subway.Line.infrastructure.LineRepository;
@@ -27,12 +25,10 @@ public class LineService {
 
     private final LineRepository lineRepository;
     private final StationRepository stationRepository;
-    private final SectionRepository sectionRepository;
 
-    public LineService(LineRepository lineRepository, StationRepository stationRepository, SectionRepository sectionRepository) {
+    public LineService(LineRepository lineRepository, StationRepository stationRepository) {
         this.lineRepository = lineRepository;
         this.stationRepository = stationRepository;
-        this.sectionRepository = sectionRepository;
     }
 
     @Transactional
@@ -136,8 +132,6 @@ public class LineService {
         Line line = this.lineRepository.findById(lineId)
                 .orElseThrow(() -> new BadRequestException(NOT_FOUND_LINE));
 
-        Section deleteSection = this.sectionRepository.findByLineAndDownStationId(line, stationId)
-                                                .orElseThrow(() -> new BadRequestException(NOT_FOUND_STATION));
-        line.deleteSection(deleteSection);
+        line.deleteSection(stationId);
     }
 }
