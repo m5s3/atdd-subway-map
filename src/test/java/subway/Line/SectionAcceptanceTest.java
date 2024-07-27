@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,8 +67,7 @@ public class SectionAcceptanceTest extends LineAcceptanceFixture {
         createSection(신분당선, 논현역, 양재역, 10);
 
         // Then
-        int 신분당선_길이 = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
-                .log().all().extract().jsonPath().getInt("distance");
+        int 신분당선_길이 = getStationsId(신분당선).jsonPath().getInt("distance");
 
         assertThat(신분당선_길이).isEqualTo(17);
     }
@@ -84,10 +84,9 @@ public class SectionAcceptanceTest extends LineAcceptanceFixture {
         createSection(신분당선, 논현역, 양재역, 10);
 
         // Then
-        var ids = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
-                .log().all().extract().jsonPath().getList("stations.id");
+        var ids = getStationsId(신분당선).jsonPath().getList("stations.id");
 
-        var stationIds = ids.stream().map(id -> Long.valueOf((int)id)).collect(Collectors.toList());
+        var stationIds = stationIdsToList(ids);
         var 노선_하행_종점역 = stationIds.get(stationIds.size() - 1);
 
         assertThat(노선_하행_종점역).isEqualTo(양재역);
@@ -146,19 +145,31 @@ public class SectionAcceptanceTest extends LineAcceptanceFixture {
         createSection(신분당선, 논현역, 양재역, 10);
 
         // When
-        ExtractableResponse<Response> response = RestAssured.given().log().all().when()
+        deleteSection();
+
+        // Then
+        var ids = getStationsId(신분당선).jsonPath().getList("stations.id");
+        var stationIds = stationIdsToList(ids);
+        var 노선_하행_종점역 = stationIds.get(stationIds.size() - 1);
+
+        assertThat(노선_하행_종점역).isEqualTo(논현역);
+    }
+
+    private ExtractableResponse<Response> getStationsId(Long lineId) {
+        return RestAssured.given().log().all().when().get("/lines/" + lineId).then()
+                .log().all().extract();
+    }
+
+    private List<Long> stationIdsToList(List<Object> ids) {
+        return ids.stream().map(id -> Long.valueOf((int)id)).collect(Collectors.toList());
+    }
+
+    private ExtractableResponse<Response> deleteSection() {
+        return RestAssured.given().log().all().when()
                 .queryParam("stationId", 양재역)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .delete("/lines/" + 신분당선 + "/sections")
                 .then().log().all().extract();
-
-        // Then
-        var ids = RestAssured.given().log().all().when().get("/lines/" + 신분당선).then()
-                .log().all().extract().jsonPath().getList("stations.id");
-        var stationIds = ids.stream().map(id -> Long.valueOf((int)id)).collect(Collectors.toList());
-        var 노선_하행_종점역 = stationIds.get(stationIds.size() - 1);
-
-        assertThat(노선_하행_종점역).isEqualTo(논현역);
     }
 
     private ExtractableResponse<Response> createSection(Long lineId, Long upStationId, Long downStationId, int distance) {
