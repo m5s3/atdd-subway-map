@@ -1,5 +1,10 @@
 package subway.Line.domain;
 
+import static subway.global.exception.ExceptionCode.INVALID_DELETE_DOWNSTATION;
+import static subway.global.exception.ExceptionCode.INVALID_DOWNSTATION_NOT_NEW_EQUAL_DOWNSTATION;
+import static subway.global.exception.ExceptionCode.INVALID_DOWNSTATION_TO_BE_NEW_UPSTATION;
+import static subway.global.exception.ExceptionCode.INVALID_SECTION_MIN;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -9,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import subway.global.exception.BadRequestException;
 
 @Entity
 public class Line {
@@ -85,12 +91,12 @@ public class Line {
     public void addSection(Long upStationId, Long downStationId, int distance) {
         if (!this.sections.isEmpty() &&
                 !this.downStationId.equals(upStationId)) {
-            throw new IllegalArgumentException("기존 구간의 하행 종점역이 새로운 구간 상행역이 되어야 합니다.");
+            throw new BadRequestException(INVALID_DOWNSTATION_TO_BE_NEW_UPSTATION);
         }
 
         if (!this.sections.isEmpty() &&
                 this.downStationId.equals(downStationId)) {
-            throw new IllegalArgumentException("새로운 구간의 하행 종점역과 기존 구간의 하행 종점역은 같으면 안됩니다.");
+            throw new BadRequestException(INVALID_DOWNSTATION_NOT_NEW_EQUAL_DOWNSTATION);
         }
         this.sections.add(new Section(upStationId, downStationId, distance, this));
         this.distance = calculateDistance();
@@ -99,11 +105,11 @@ public class Line {
 
     public void deleteSection(Section section) {
         if (!this.downStationId.equals(section.getDownStationId())) {
-            throw new IllegalArgumentException("마지막 구간만 삭제 할 수 있습니다.");
+            throw new BadRequestException(INVALID_DELETE_DOWNSTATION);
         }
 
         if (this.sections.size() < 2) {
-            throw new IllegalArgumentException("구간이 1개일 경우 삭제 할 수 없습니다.");
+            throw new BadRequestException(INVALID_SECTION_MIN);
         }
 
         this.downStationId = section.getUpStationId();
